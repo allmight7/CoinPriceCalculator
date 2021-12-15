@@ -1,7 +1,7 @@
 import React,{ Component } from "react";
 import './App.css';
-import Customer from './components/Customer';
-import CustomerAdd from './components/CustomerAdd';
+import Coin from './components/Coin';
+import CoinAdd from './components/CoinAdd';
 import Paper from "@material-ui/core/Paper";
 import Table from '@material-ui/core/Table'
 import TableHead from '@material-ui/core/TableHead'
@@ -18,6 +18,7 @@ import Typography from '@material-ui/core/Typography';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
+import CoinAvg from "./components/CoinAvg";
 
 const styles = theme => ({
   root: {
@@ -44,7 +45,8 @@ const styles = theme => ({
     flexGrow: 1,
   },
   tableHead: {
-    fontSize: '1.0rem'
+    fontSize: '1.0rem',
+    backgroundColor: '#33c9dc'
   },
     menuButton: {
     marginLeft: -12,
@@ -103,7 +105,7 @@ class App extends Component {
   constructor(props){
       super(props);
       this.state = {
-        customers: '',
+        coins: '',
         completed: 0,
         searchKeyword: ''
       }
@@ -111,18 +113,18 @@ class App extends Component {
 
   stateRefresh = () => {
     this.setState({
-      customers: '',
+      coins: '',
       completed: 0,
       searchKeyword: ''
     });
-    this.callApi().then(res => this.setState({customers : res})).catch(err => console.log(err))
+    this.callApi().then(res => this.setState({coins : res})).catch(err => console.log(err))
   }
   componentDidMount() {
     this.timer = setInterval(this.progress, 0);
-    this.callApi().then(res => this.setState({customers : res})).catch(err => console.log(err))
+    this.callApi().then(res => this.setState({coins : res})).catch(err => console.log(err))
   }
   callApi = async () => {
-    const response = await fetch('/api/customers');
+    const response = await fetch('/api/coins');
     const body = await response.json();
     return body;
   }
@@ -140,14 +142,45 @@ class App extends Component {
     render(){
       const filteredComponents = (data) => {
         data = data.filter((c) => {
-          return c.name.indexOf(this.state.searchKeyword) > -1;
+          return c.coinName.indexOf(this.state.searchKeyword) > -1;
         });
         return data.map((c) => {
-            return <Customer stateRefresh={this.stateRefresh} key={c.id} id={c.id} image={c.image} name={c.name} birthday={c.birthday} gender={c.gender}job={c.job} />
+            return <Coin stateRefresh={this.stateRefresh} key={c.id} id={c.id} coinSite={c.coinSite} coinName={c.coinName} buyPrice={priceToString(c.buyPrice)} quantity={priceToString(c.quantity)} amount={priceToString(c.amount)} />
         });
       }
+      const getAvg = (data) =>{
+        data = data.filter((c) => {
+          return c.coinName.indexOf(this.state.searchKeyword) > -1;
+        });
+        // return data.map((c) => {
+        //     return <CoinAvg stateRefresh={this.stateRefresh} key={c.id} id={c.id} coinSite={c.coinSite} coinName={c.coinName} buyPrice={c.buyPrice} quantity={c.quantity} amount={c.amount} />
+        // });
+        let quantity =0;
+        let amount =0;
+        let avg =0;
+        let coinName = 0;
+        let currentPrice =0;
+        let profit = 0;
+        let profitRate = 0;
+         data.map((c) => {
+          coinName = c.coinName;
+          quantity += c.quantity;
+          amount += c.amount;
+        });
+        avg = (amount/quantity).toFixed(2);
+        currentPrice = 37;
+        profitRate = ((currentPrice-avg) / avg).toFixed(5);
+        profit = amount * profitRate;
+        return <CoinAvg stateRefresh={this.stateRefresh} key={coinName} coinName={coinName} 
+               buyPrice={priceToString(avg)} quantity={priceToString(quantity)} amount={priceToString(amount)} 
+                currentPrice={priceToString(currentPrice)} profitRate={(profitRate * 100).toFixed(2)} profit={priceToString(profit.toFixed(0))}/>
+      }
+      function priceToString(price) {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
         const { classes } = this.props;
-        const cellList = ["번호","프로필 이미지","이름","생년월일","성별","직업","설정"]
+        const cellList = ["번호","거래소명","코인명","매수가격","매수수량","매수 총금액","설정"]
+        const cellList2 = ["코인명","평단가","매수수량","매수 총금액","현재코인가격","예상수익률","예상수익금"]
         return (
           <div className={classes.root}>
             <AppBar position="static">
@@ -156,7 +189,7 @@ class App extends Component {
                 <MenuIcon />
                 </IconButton>
                 <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-                고객 관리 시스템
+                코인 평단 계산기
                 </Typography>
                 <div className={classes.grow} />
                 <div className={classes.search}>
@@ -176,8 +209,28 @@ class App extends Component {
                 </div>
               </Toolbar>
             </AppBar>
+                    <Paper className={classes.paper}>
+                    <Table className={classes.table}>
+                      <TableHead >
+                        <TableRow>
+                          {cellList2.map(c => {
+                            return <TableCell className={classes.tableHead}>{c}</TableCell>
+                          })}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {this.state.coins ? getAvg(this.state.coins) :
+                          <TableRow>
+                          <TableCell colSpan="6" align="center">
+                            <CircularProgress className={classes.progress} variant="determinate" value={this.state.completed} />
+                          </TableCell>
+                        </TableRow>
+                        }
+                      </TableBody>
+                    </Table>
+                    </Paper>
             <div className={classes.menu}>
-              <CustomerAdd stateRefresh={this.stateRefresh}/>
+              <CoinAdd stateRefresh={this.stateRefresh}/>
             </div>
             <Paper className={classes.paper}>
             <Table className={classes.table}>
@@ -189,8 +242,8 @@ class App extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.state.customers ? 
-                  filteredComponents(this.state.customers) :
+                {this.state.coins ? 
+                  filteredComponents(this.state.coins) :
                 <TableRow>
                   <TableCell colSpan="6" align="center">
                     <CircularProgress className={classes.progress} variant="determinate" value={this.state.completed} />

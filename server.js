@@ -27,25 +27,26 @@ connection.connect((err)=>{
 const multer = require('multer');
 const upload = multer({dest: './upload'});
 
-app.get('/api/customers',(req,res) => {
+app.get('/api/coins',(req,res) => {
     connection.query(
-        'SELECT * FROM management.customer where isDeleted = 0 ',
+        'SELECT * FROM coinInfo',
         (err, rows, fields) => {
             res.send(rows);
         }
     )
 });
 
-app.use('/image', express.static('./upload'));
+// app.use('/image', express.static('./upload'));
 
-app.post('/api/customers', upload.single('image'), (req,res) => {
-    let sql = 'insert into management.customer values (null, ?, ?, ?, ?, ?, now(), 0)';
-    let image = '/image/' + req.file.filename;
-    let name =req.body.name;
-    let birthday =req.body.birthday;
-    let gender =req.body.gender;
-    let job =req.body.job;
-    let params = [image, name, birthday, gender, job];
+app.post('/api/coins', upload.single('image'), (req,res) => {
+    let sql = 'insert into coinInfo values (null, ?, ?, ?, ?, ?)';
+    // let image = '/image/' + req.file.filename;
+    let coinSite =req.body.coinSite;
+    let coinName =req.body.coinName;
+    let buyPrice =req.body.buyPrice;
+    let quantity =req.body.quantity;
+    let amount =req.body.amount;
+    let params = [coinSite, coinName, buyPrice, quantity, amount];
     connection.query(sql, params,
             (err, rows, fields) => {
                 res.send(rows);
@@ -53,8 +54,8 @@ app.post('/api/customers', upload.single('image'), (req,res) => {
         )
 });
 
-app.delete('/api/customers/:id', (req, res) => {
-    let sql = 'update management.customer set isDeleted = 1 where id = ?';
+app.delete('/api/coins/:id', (req, res) => {
+    let sql = 'delete from coinInfo where id = ?';
     let params = [req.params.id];
     connection.query(sql, params,
         (err, rows, fields) => {

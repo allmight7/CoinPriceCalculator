@@ -14,16 +14,16 @@ const styles = theme => ({
     }
 });
 
-class CustomerAdd extends React.Component {
+class CoinAdd extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            file: null,
-            userName: '',
-            birthday: '',
-            gender: '',
-            job: '',
+            coinSite: '',
+            coinName: '',
+            buyPrice: '',
+            quantity: '',
+            amount: '',
             fileName: '',
             open: false
         }
@@ -37,24 +37,25 @@ class CustomerAdd extends React.Component {
 
     handleClose= () => {
         this.setState({
-            file: null,
-            userName: '',
-            birthday: '',
-            gender: '',
-            job: '',
+            coinSite: '',
+            coinName: '',
+            buyPrice: '',
+            quantity: '',
+            amount: '',
             fileName: '',
             open: false
         });
     }
 
-    addCustomer = () => {
-        const url ='/api/customers';
+    addCoin = () => {
+        const url ='/api/coins';
         const formData = new FormData();
-        formData.append('image', this.state.file);
-        formData.append('name', this.state.userName);
-        formData.append('birthday', this.state.birthday);
-        formData.append('gender', this.state.gender);
-        formData.append('job', this.state.job);
+        // formData.append('image', this.state.file);
+        formData.append('coinSite', this.state.coinSite);
+        formData.append('coinName', this.state.coinName);
+        formData.append('buyPrice', this.state.buyPrice);
+        formData.append('quantity', this.state.quantity);
+        formData.append('amount', this.state.buyPrice * this.state.quantity);
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'
@@ -65,17 +66,18 @@ class CustomerAdd extends React.Component {
     
     handleFormSubmit = (e) => {
         e.preventDefault()
-        this.addCustomer()
+        this.addCoin()
             .then((response) => {
             console.log(response.data);
             this.props.stateRefresh();
         })
         this.setState({
             file: null,
-            userName: '',
-            birthday: '',
-            gender: '',
-            job: '',
+            coinSite: '',
+            coinName: '',
+            buyPrice: '',
+            quantity: '',
+            amount: '',
             fileName: '',
             open: false
         })
@@ -93,28 +95,32 @@ class CustomerAdd extends React.Component {
         nextState[e.target.name] = e.target.value;
         this.setState(nextState);
     }
-    
+
+
     render() {
         const { classes } = this.props;
         return (
             <div>
                 <Button variant="contained" color="primary" onClick={this.handleClickOpen}>
-                    고객 추가하기
+                    코인 평단 추가하기
                 </Button>
                 <Dialog open={this.state.open} onClose={this.handleClose}> 
-                    <DialogTitle>고객 추가</DialogTitle>
+                    <DialogTitle>코인 평단 추가</DialogTitle>
                     <DialogContent>
-                    <input className={classes.hidden} accept="image/*" id="raised-button-file" type="file" file={this.state.file} value={this.state.fileName} onChange={this.handleFileChange}/><br/>
+                    {/* <input className={classes.hidden} accept="image/*" id="raised-button-file" type="file" file={this.state.file} value={this.state.fileName} onChange={this.handleFileChange}/><br/>
                     <label htmlFor="raised-button-file">
                         <Button variant="contained" color="primary" component="span" name="file">
                             {this.state.fileName === "" ? "프로필 이미지 선택" : this.state.fileName}
                         </Button>
                     </label>
-                    <br/>
-                    <TextField label="이름" type="text" name="userName" value={this.state.userName} onChange={this.handleValueChange}/><br/>
-                    <TextField label="생년월일" type="text" name="birthday" value={this.state.birthday} onChange={this.handleValueChange}/><br/>
-                    <TextField label="성별" type="text" name="gender" value={this.state.gender} onChange={this.handleValueChange}/><br/>
-                    <TextField label="직업" type="text" name="job" value={this.state.job} onChange={this.handleValueChange}/><br/>
+                    <br/> */}
+
+
+                    <TextField label="거래소명" type="text" name="coinSite" value={this.state.coinSite} onChange={this.handleValueChange}/><br/>
+                    <TextField label="코인명" type="text" name="coinName" value={this.state.coinName} onChange={this.handleValueChange}/><br/>
+                    <TextField label="매수가격" type="text" name="buyPrice" value={this.state.buyPrice} onChange={this.handleValueChange}/><br/>
+                    <TextField label="매수수량" type="text" name="quantity" value={this.state.quantity} onChange={this.handleValueChange}/><br/>
+                    <TextField label="매수 총금액" type="text" name="amount" value={this.state.buyPrice*this.state.quantity}  /><br/>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" color="primary" onClick={this.handleFormSubmit}>추가</Button>
@@ -128,10 +134,10 @@ class CustomerAdd extends React.Component {
             <form onSubmit={this.handleFormSubmit}>
                 <h1>고객 추가</h1>
                 프로필 이미지: <input type="file" name="file" file={this.state.file} value={this.state.fileName} onChange={this.handleFileChange}/><br/>
-                이름: <input type="text" name="userName" value={this.state.userName} onChange={this.handleValueChange}/><br/>
-                생년월일: <input type="text" name="birthday" value={this.state.birthday} onChange={this.handleValueChange}/><br/>
-                성별: <input type="text" name="gender" value={this.state.gender} onChange={this.handleValueChange}/><br/>
-                직업: <input type="text" name="job" value={this.state.job} onChange={this.handleValueChange}/><br/>
+                이름: <input type="text" name="coinName" value={this.state.coinName} onChange={this.handleValueChange}/><br/>
+                생년월일: <input type="text" name="buyPrice" value={this.state.buyPrice} onChange={this.handleValueChange}/><br/>
+                성별: <input type="text" name="quantity" value={this.state.quantity} onChange={this.handleValueChange}/><br/>
+                직업: <input type="text" name="amount" value={this.state.amount} onChange={this.handleValueChange}/><br/>
                 <button type="submit">추가하기</button>
             </form>
             */
@@ -139,4 +145,4 @@ class CustomerAdd extends React.Component {
     }
 }
 
-export default withStyles(styles)(CustomerAdd);
+export default withStyles(styles)(CoinAdd);
