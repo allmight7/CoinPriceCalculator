@@ -19,11 +19,12 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import CoinAvg from "./components/CoinAvg";
+import CoinCurrentPriceAdd from "./components/CoinCurrentPriceAdd";
 
 const styles = theme => ({
   root: {
-    with: '100%',
-    minWidth: 1080
+    with: '100%'
+    
   },
   progress: {
     margin: theme.spacing.unit * 2
@@ -37,9 +38,6 @@ const styles = theme => ({
   paper: {
     marginLeft: 18,
     marginRight: 18
-  },
-  progress: {
-    margin: theme.spacing.unit * 2
   },
   grow: {
     flexGrow: 1,
@@ -119,6 +117,7 @@ class App extends Component {
     });
     this.callApi().then(res => this.setState({coins : res})).catch(err => console.log(err))
   }
+ 
   componentDidMount() {
     this.timer = setInterval(this.progress, 0);
     this.callApi().then(res => this.setState({coins : res})).catch(err => console.log(err))
@@ -149,35 +148,51 @@ class App extends Component {
         });
       }
       const getAvg = (data) =>{
-        data = data.filter((c) => {
+                data = data.filter((c) => {
           return c.coinName.indexOf(this.state.searchKeyword) > -1;
         });
-        // return data.map((c) => {
-        //     return <CoinAvg stateRefresh={this.stateRefresh} key={c.id} id={c.id} coinSite={c.coinSite} coinName={c.coinName} buyPrice={c.buyPrice} quantity={c.quantity} amount={c.amount} />
-        // });
-        let quantity =0;
-        let amount =0;
-        let avg =0;
-        let coinName = 0;
-        let currentPrice =0;
-        let profit = 0;
-        let profitRate = 0;
-         data.map((c) => {
-          coinName = c.coinName;
-          quantity += c.quantity;
-          amount += c.amount;
+
+        var coins2 = new Map();
+        
+        data.map((c) => {
+          if(!coins2.has(c.coinName)){
+            var obj = [];
+            obj.coinName = c.coinName;
+            obj.quantity = c.quantity;
+            obj.amount = c.amount;
+            obj.avg = (obj.amount/obj.quantity).toFixed(5);
+            obj.currentPrice = c.currentPrice;
+            obj.profitRate = ((obj.currentPrice-obj.avg) / obj.avg).toFixed(5);
+            obj.profit = obj.amount * obj.profitRate;
+            coins2.set(c.coinName, obj);
+          }else{
+            var obj = coins2.get(c.coinName);
+            obj.coinName = c.coinName;
+            obj.quantity += c.quantity;
+            obj.amount += c.amount;
+            obj.avg = (obj.amount/obj.quantity).toFixed(5);
+            obj.currentPrice = c.currentPrice;
+            obj.profitRate = ((obj.currentPrice-obj.avg) / obj.avg).toFixed(5);
+            obj.profit = obj.amount * obj.profitRate;
+
+          }  
         });
-        avg = (amount/quantity).toFixed(2);
-        currentPrice = 37;
-        profitRate = ((currentPrice-avg) / avg).toFixed(5);
-        profit = amount * profitRate;
-        return <CoinAvg stateRefresh={this.stateRefresh} key={coinName} coinName={coinName} 
-               buyPrice={priceToString(avg)} quantity={priceToString(quantity)} amount={priceToString(amount)} 
-                currentPrice={priceToString(currentPrice)} profitRate={(profitRate * 100).toFixed(2)} profit={priceToString(profit.toFixed(0))}/>
-      }
-      function priceToString(price) {
+
+        var values = coins2.values();
+        var array ='';
+        array = Array.from(coins2.values());
+        return array.map((c) => {
+        return <CoinAvg coinName={c.coinName} 
+        buyPrice={(c.avg)} quantity={c.quantity.toFixed(2)} amount={priceToString(c.amount)} 
+        currentPrice={c.currentPrice} profitRate={(c.profitRate * 100).toFixed(2)} profit={priceToString(c.profit.toFixed(0))}/>
+        });
+
+        }
+
+      const priceToString = (price) =>{
         return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       }
+
         const { classes } = this.props;
         const cellList = ["번호","거래소명","코인명","매수가격","매수수량","매수 총금액","설정"]
         const cellList2 = ["코인명","평단가","매수수량","매수 총금액","현재코인가격","예상수익률","예상수익금"]
@@ -219,7 +234,8 @@ class App extends Component {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {this.state.coins ? getAvg(this.state.coins) :
+                        {this.state.coins ? 
+                          getAvg(this.state.coins) :
                           <TableRow>
                           <TableCell colSpan="6" align="center">
                             <CircularProgress className={classes.progress} variant="determinate" value={this.state.completed} />
@@ -231,6 +247,7 @@ class App extends Component {
                     </Paper>
             <div className={classes.menu}>
               <CoinAdd stateRefresh={this.stateRefresh}/>
+              <CoinCurrentPriceAdd stateRefresh={this.stateRefresh} />
             </div>
             <Paper className={classes.paper}>
             <Table className={classes.table}>

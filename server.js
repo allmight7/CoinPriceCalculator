@@ -36,24 +36,33 @@ app.get('/api/coins',(req,res) => {
     )
 });
 
-// app.use('/image', express.static('./upload'));
 
-app.post('/api/coins', upload.single('image'), (req,res) => {
-    let sql = 'insert into coinInfo values (null, ?, ?, ?, ?, ?)';
-    // let image = '/image/' + req.file.filename;
+app.post('/api/coins', upload.single('monya'), (req,res) => {
+    let sql = 'insert into coinInfo values (null, ?, ?, ?, ?, ?,?)';
     let coinSite =req.body.coinSite;
     let coinName =req.body.coinName;
     let buyPrice =req.body.buyPrice;
     let quantity =req.body.quantity;
     let amount =req.body.amount;
-    let params = [coinSite, coinName, buyPrice, quantity, amount];
+    let currentPrice =req.body.buyPrice;
+    let params = [coinSite, coinName, buyPrice, quantity, amount, currentPrice];
     connection.query(sql, params,
             (err, rows, fields) => {
                 res.send(rows);
             }
         )
 });
-
+app.post('/api/current', upload.single('monya'), (req,res) => {
+    let sql = 'update coinInfo set currentPrice = ? where coinName = ?';
+    let currentPrice = req.body.currentPrice;
+    let coinName = req.body.coinName;
+    let params = [ currentPrice,coinName];
+    connection.query(sql, params,
+        (err, rows, fields) => {
+            res.send(rows);
+        }
+    )
+});
 app.delete('/api/coins/:id', (req, res) => {
     let sql = 'delete from coinInfo where id = ?';
     let params = [req.params.id];

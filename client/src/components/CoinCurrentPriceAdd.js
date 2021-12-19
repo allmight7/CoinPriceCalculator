@@ -14,45 +14,38 @@ const styles = theme => ({
     }
 });
 
-class CoinAdd extends React.Component {
+class CoinCurrentPriceAdd extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            coinSite: '',
             coinName: '',
-            buyPrice: '',
-            quantity: '',
-            amount: '',
+            currentPrice: '',
             open: false
         }
     }
 
     handleClickOpen = () => {
         this.setState({
+            coinName: '',
+            currentPrice: '',
             open: true
         });
     }
 
     handleClose= () => {
         this.setState({
-            coinSite: '',
             coinName: '',
-            buyPrice: '',
-            quantity: '',
-            amount: '',
+            currentPrice: '',
             open: false
         });
     }
 
     addCoin = () => {
-        const url ='/api/coins';
+        const url ='/api/current';
         const formData = new FormData();
-        formData.append('coinSite', this.state.coinSite);
         formData.append('coinName', this.state.coinName);
-        formData.append('buyPrice', this.state.buyPrice);
-        formData.append('quantity', this.state.quantity);
-        formData.append('amount', this.state.buyPrice * this.state.quantity);
+        formData.append('currentPrice', this.state.currentPrice);
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'
@@ -69,38 +62,29 @@ class CoinAdd extends React.Component {
             this.props.stateRefresh();
         })
         this.setState({
-            coinSite: '',
-            coinName: '',
-            buyPrice: '',
-            quantity: '',
-            amount: '',
+            currentPrice: '',
             open: false
         })
     }
-
 
     handleValueChange = (e) => {
         let nextState = {};
         nextState[e.target.name] = e.target.value;
         this.setState(nextState);
     }
-    
+
+
     render() {
-        const { classes } = this.props;
         return (
             <div>
-                <Button variant="contained" color="primary" onClick={this.handleClickOpen}>
-                    코인 평단 추가
+                <Button variant="contained" color="secondary" onClick={this.handleClickOpen}>
+                    코인 현재가 수정
                 </Button>
                 <Dialog open={this.state.open} onClose={this.handleClose}> 
-                    <DialogTitle>코인 평단 추가</DialogTitle>
+                    <DialogTitle>코인 현재가 추가</DialogTitle>
                     <DialogContent>
-                    <TextField label="거래소명" type="text" name="coinSite" value={this.state.coinSite} onChange={this.handleValueChange}/><br/>
                     <TextField label="코인명" type="text" name="coinName" value={this.state.coinName} onChange={this.handleValueChange}/><br/>
-                    <TextField label="매수가격" type="text" name="buyPrice" value={this.state.buyPrice} onChange={this.handleValueChange}/><br/>
-                    <TextField label="매수수량" type="text" name="quantity" value={this.state.quantity} onChange={this.handleValueChange}/><br/>
-                    <TextField label="매수 총금액" type="text" name="amount" value={this.state.buyPrice*this.state.quantity}  /><br/>
-                    
+                    <TextField label="코인 현재가" type="text" name="currentPrice" value={this.state.currentPrice} onChange={this.handleValueChange}/><br/>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" color="primary" onClick={this.handleFormSubmit}>추가</Button>
@@ -113,4 +97,4 @@ class CoinAdd extends React.Component {
     }
 }
 
-export default withStyles(styles)(CoinAdd);
+export default withStyles(styles)(CoinCurrentPriceAdd);
